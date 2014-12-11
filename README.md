@@ -1,5 +1,3 @@
-# # 
+# Skilo Chat
 
-Skilo Chat
-
-UDP Chat Client written in python
+## UDP Chat Client written in python
