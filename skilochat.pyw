@@ -1,4 +1,4 @@
-#Skilo Chat version 1.0.0.5: Encrypted peer-to-peer chat client
+#Skilo Chat Encrypted UDP peer-to-peer chat client
 #Developed by Skilo, skilo47@gmail.com
 #GPLV3 Free Software
 #License: http://gnu.org/copyleft/gpl.html
@@ -19,6 +19,7 @@
 
 
 import string
+import traceback
 import random
 import socket   
 from threading import Thread
@@ -61,7 +62,7 @@ def keyGen(size=8, chars=string.hexdigits):
     keyFile.write(key)
     keyFile.close()
     textDisplayBox.configure(state=NORMAL)
-    textDisplayBox.insert(END, "\n" + "This is your encryption key: " + key)
+    textDisplayBox.insert(END, "\n" + "This is your encryption key: " + key + "\n" + "It is stored in keyfile.txt" + "\n")
     textDisplayBox.configure(state=DISABLED)
 
 def about():
@@ -121,22 +122,27 @@ def stop():
     
 
 def recvData():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    recvHost = ""#enter IP to bind to, this is optional
-    recvPort = 8888
-    s.bind((recvHost, recvPort))
-    while 1:
-        d = s.recvfrom(1024)
-        data = d[0]
-        addr = d[1]
-        global decKeyFile
-        k = des(decKeyFile, ECB, pad=None, padmode=PAD_PKCS5)
-        decMessage = k.decrypt(data)
-        reply = decMessage.decode("UTF-8")
-        textDisplayBox.configure(state=NORMAL)
-        textDisplayBox.insert(END, '\n' + reply)
-        textDisplayBox.yview(END)
-        textDisplayBox.configure(state=DISABLED)
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        recvHost = ""#enter IP to bind to, this is optional
+        recvPort = 8888
+        s.bind((recvHost, recvPort))
+        while 1:
+            d = s.recvfrom(1024)
+            data = d[0]
+            addr = d[1]
+            global deKey
+            k = des(deKey, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+            decMessage = k.decrypt(data)
+            reply = decMessage.decode("UTF-8")
+            textDisplayBox.configure(state=NORMAL)
+            textDisplayBox.insert(END, '\n' + reply)
+            textDisplayBox.yview(END)
+            textDisplayBox.configure(state=DISABLED)
+    except:
+        e = traceback.format_exc()
+        with open("error_log.txt", "a") as f:
+            f.write(e)
         
 
 def sendData():
@@ -155,7 +161,7 @@ def sendData():
     textDisplayBox.configure(state=DISABLED)
     textEntryBox.delete(0, END)
     global key
-    k = des(key, ECB, pad=None, padmode=PAD_PKCS5)
+    k = des(key, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
     encMessage = k.encrypt(username + spacer + msg)
     s.sendto(bytes(encMessage), (host, port))
     
@@ -166,6 +172,8 @@ def pressAction(event):
 
 def disableEntry(event):
     textEntryBox.config(state=DISABLED)
+
+#main function begins here
          
 username = "Anonymous"
 host = "192.168.1.0" #value set to internal ip to prevent errors when no IP is set.
@@ -173,14 +181,10 @@ recvDataThread = Thread(target=recvData)
 recvDataThread.daemon = True
 recvDataThread.start()
 
-#read the encryption key from the file
-#this eliminates the need to generate a new key each time
-global keyFile
-global key
-global decKeyFile
-decKeyFile = open("deckey.txt", "r").read()
-keyFile = open('keyfile.txt', 'r')
-key = keyFile.read()
+#read encryption key from file 
+with open("keyfile.txt", "r") as readKey:
+    global key
+    key = readKey.read()
 
 
 #create root window
@@ -249,7 +253,8 @@ textEntryBox.pack(side=BOTTOM)
 #kick off the event loop
 root.config(menu=menubar)
 root.mainloop()
-    
+
+#end of main function
 
     
     
