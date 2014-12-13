@@ -1,6 +1,6 @@
 # Skilo Chat
 
-An instant messenger written in python.
+An encrypted instant messenger written in python.
 
 ### Prerequisits
 

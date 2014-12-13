@@ -166,6 +166,7 @@ def sendData():
         s.connect((host, 8888))
         s.send(bytes(encMessage))
     except:
+        s.close()
         e = traceback.format_exc()
         with open("error_log.txt", "a") as f:
             f.write(e)
@@ -186,16 +187,15 @@ host = "192.168.1.0" #value set to internal ip to prevent errors when no IP is s
 #read decryption key from file
 decryptionKey = open("deckey.txt", "r").read()
 
-#start listening for incoming connections
-recvDataThread = Thread(target=recvData)
-recvDataThread.daemon = True
-recvDataThread.start()
-
 #read encryption key from file 
 with open("keyfile.txt", "r") as readKey:
     global key
     key = readKey.read()
 
+#start listening for incoming connections
+recvDataThread = Thread(target=recvData)
+recvDataThread.daemon = True
+recvDataThread.start()
 
 #create root window
 root = Tk()
