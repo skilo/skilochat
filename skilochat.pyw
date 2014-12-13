@@ -1,4 +1,4 @@
-#Skilo Chat Encrypted UDP peer-to-peer chat client
+#Skilo Chat Encrypted Instant Messenger
 #Developed by Skilo, skilo47@gmail.com
 #GPLV3 Free Software
 #License: http://gnu.org/copyleft/gpl.html
@@ -123,16 +123,13 @@ def stop():
 
 def recvData():
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        recvHost = ""#enter IP to bind to, this is optional
-        recvPort = 8888
-        s.bind((recvHost, recvPort))
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(('', 8888))
+        s.listen(10)
         while 1:
-            d = s.recvfrom(1024)
-            data = d[0]
-            addr = d[1]
-            global deKey
-            k = des(deKey, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+            conn, addr = s.accept()
+            data = conn.recv(1024)
+            k = des(decryptionKey, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
             decMessage = k.decrypt(data)
             reply = decMessage.decode("UTF-8")
             textDisplayBox.configure(state=NORMAL)
@@ -143,27 +140,35 @@ def recvData():
         e = traceback.format_exc()
         with open("error_log.txt", "a") as f:
             f.write(e)
+    finally:
+        s.close()
         
 
 def sendData():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    global host
-    port = 8888
-    global username 
-    spacer = ": "
-    msg = entryText.get()
-    msg.encode("UTF-8")
-    spacer.encode("UTF-8")
-    username.encode("UTF-8") 
-    textDisplayBox.configure(state=NORMAL)
-    textDisplayBox.insert(END, '\n' + username + spacer + msg)
-    textDisplayBox.yview(END)
-    textDisplayBox.configure(state=DISABLED)
-    textEntryBox.delete(0, END)
-    global key
-    k = des(key, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
-    encMessage = k.encrypt(username + spacer + msg)
-    s.sendto(bytes(encMessage), (host, port))
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        global host
+        port = 8888
+        global username 
+        spacer = ": "
+        msg = entryText.get()
+        msg.encode("UTF-8")
+        spacer.encode("UTF-8")
+        username.encode("UTF-8") 
+        textDisplayBox.configure(state=NORMAL)
+        textDisplayBox.insert(END, '\n' + username + spacer + msg)
+        textDisplayBox.yview(END)
+        textDisplayBox.configure(state=DISABLED)
+        textEntryBox.delete(0, END)
+        global key
+        k = des(key, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+        encMessage = k.encrypt(username + spacer + msg)
+        s.connect((host, 8888))
+        s.send(bytes(encMessage))
+    except:
+        e = traceback.format_exc()
+        with open("error_log.txt", "a") as f:
+            f.write(e)
     
 
 def pressAction(event):
@@ -177,6 +182,11 @@ def disableEntry(event):
          
 username = "Anonymous"
 host = "192.168.1.0" #value set to internal ip to prevent errors when no IP is set.
+
+#read decryption key from file
+decryptionKey = open("deckey.txt", "r").read()
+
+#start listening for incoming connections
 recvDataThread = Thread(target=recvData)
 recvDataThread.daemon = True
 recvDataThread.start()
