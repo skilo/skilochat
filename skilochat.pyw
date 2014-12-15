@@ -156,7 +156,7 @@ def sendData():
         spacer.encode("UTF-8")
         username.encode("UTF-8") 
         textDisplayBox.configure(state=NORMAL)
-        textDisplayBox.insert(END, '\n' + username + spacer + msg)
+        textDisplayBox.insert(END, '\n' + '\n' + username + spacer + msg)
         textDisplayBox.yview(END)
         textDisplayBox.configure(state=DISABLED)
         textEntryBox.delete(0, END)
