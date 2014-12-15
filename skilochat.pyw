@@ -133,7 +133,7 @@ def recvData():
             decMessage = k.decrypt(data)
             reply = decMessage.decode("UTF-8")
             textDisplayBox.configure(state=NORMAL)
-            textDisplayBox.insert(END, '\n' + reply)
+            textDisplayBox.insert(END, '\n' + reply + '\n')
             textDisplayBox.yview(END)
             textDisplayBox.configure(state=DISABLED)
     except:
@@ -152,19 +152,22 @@ def sendData():
         global username 
         spacer = ": "
         msg = entryText.get()
-        msg.encode("UTF-8")
-        spacer.encode("UTF-8")
-        username.encode("UTF-8") 
-        textDisplayBox.configure(state=NORMAL)
-        textDisplayBox.insert(END, '\n' + '\n' + username + spacer + msg)
-        textDisplayBox.yview(END)
-        textDisplayBox.configure(state=DISABLED)
-        textEntryBox.delete(0, END)
-        global key
-        k = des(key, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
-        encMessage = k.encrypt(username + spacer + msg)
-        s.connect((host, 8888))
-        s.send(bytes(encMessage))
+        if len(msg) < 1:
+            pass
+        elif len(msg) >= 1:
+            msg.encode("UTF-8")
+            spacer.encode("UTF-8")
+            username.encode("UTF-8") 
+            textDisplayBox.configure(state=NORMAL)
+            textDisplayBox.insert(END, '\n' + username + spacer + msg + '\n')
+            textDisplayBox.yview(END)
+            textDisplayBox.configure(state=DISABLED)
+            textEntryBox.delete(0, END)
+            global key
+            k = des(key, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+            encMessage = k.encrypt(username + spacer + msg)
+            s.connect((host, 8888))
+            s.send(bytes(encMessage))
     except:
         s.close()
         e = traceback.format_exc()
