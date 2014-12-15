@@ -15,9 +15,8 @@ An encrypted instant messenger written in python.
 4. Allow python to use port 8888 inbound and outbound in windows firewall
 5. Install Skilo Chat
 
-* Download skilochat.pyw
-* Create a folder where you want it to run from
-* Create 2 empty text files named "deckey.txt" and "keyfile.txt"
+* [Get the newest release](https://github.com/skilo/skilochat/releases)
+* Download the souce .zip or .tar file and extract it to a folder of your preference
 * Run skilo chat by double clicking on skilochat.pyw
 * Or in a terminal type "python skilochat.pyw"
 
