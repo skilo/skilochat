@@ -4,17 +4,17 @@
 #License: http://gnu.org/copyleft/gpl.html
 
 #This program is free software: you can redistribute it and/or modify
-    #it under the terms of the GNU General Public License as published by
-    #the Free Software Foundation, either version 3 of the License, or
-    #(at your option) any later version.
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
 
-    #This program is distributed in the hope that it will be useful,
-    #but WITHOUT ANY WARRANTY; without even the implied warranty of
-    #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    #GNU General Public License for more details.
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
 
-    #You should have received a copy of the GNU General Public License
-    #along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
@@ -114,6 +114,11 @@ def saveUsername():
     username = StringVar()
     global usernameEntry
     username = usernameEntry.get()
+    if len(username) > 15:
+        username = "Anonymous"
+        textDisplayBox.configure(state=NORMAL)
+        textDisplayBox.insert(END, "\n" + "Username cannot be longer than 15 characters" + "\n")
+        textDisplayBox.configure(state=DISABLED)
     global topSetUsername
     topSetUsername.destroy()
 
@@ -140,6 +145,7 @@ def recvData():
         e = traceback.format_exc()
         with open("error_log.txt", "a") as f:
             f.write(e)
+    #This may be redundant?
     finally:
         s.close()
         
@@ -185,7 +191,7 @@ def disableEntry(event):
 #main function begins here
          
 username = "Anonymous"
-host = "192.168.1.0" #value set to internal ip to prevent errors when no IP is set.
+host = "127.0.0.1" #value set to loopback to prevent errors when no ip is set
 
 #read decryption key from file
 decryptionKey = open("deckey.txt", "r").read()
