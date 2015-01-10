@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 #Skilo Chat Encrypted Instant Messenger
 #Developed by Skilo, skilo47@gmail.com
 #GPLV3 Free Software
